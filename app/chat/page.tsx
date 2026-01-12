@@ -241,7 +241,7 @@ export default function ChatPage() {
         setDirectMessages(userId, response.messages || []);
         scrollToBottom();
       } else {
-        console.error('Failed to load messages:', response.error);
+        console.error('Failed to load messages');
       }
     } catch (error: any) {
       console.error('Failed to load direct messages:', error);
@@ -405,7 +405,7 @@ export default function ChatPage() {
           setNewMessage('');
           messageInputRef.current?.focus();
         } else {
-          throw new Error(response.error || 'Failed to send message');
+          throw new Error('Failed to send message');
         }
       } catch (error: any) {
         console.error('Error sending direct message:', error);

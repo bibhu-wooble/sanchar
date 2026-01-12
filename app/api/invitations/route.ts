@@ -11,9 +11,9 @@ export async function GET(req: Request) {
 
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
-    // Use raw query to fetch invitations
-    let invitations = [];
-    try {
+        // Use raw query to fetch invitations
+        let invitations: any[] = [];
+        try {
       const results = await prisma.$queryRaw`
         SELECT 
           i.*,
