@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { corsHeaders } from "@/lib/cors";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +13,7 @@ export async function POST(req: Request) {
     const token = req.headers.get("authorization")?.split(" ")[1];
 
     if (!receiverId || !content || !token) {
-      return NextResponse.json({ success: false, error: "Missing data" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing data" }, { status: 400, headers: corsHeaders });
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
@@ -44,7 +49,7 @@ export async function POST(req: Request) {
         directMessage = Array.isArray(newDM) && newDM.length > 0 ? newDM[0] : null;
       } catch (error) {
         console.error("Error creating direct message:", error);
-        return NextResponse.json({ success: false, error: "Failed to create conversation" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "Failed to create conversation" }, { status: 500, headers: corsHeaders });
       }
     }
 
@@ -67,14 +72,14 @@ export async function POST(req: Request) {
       
       if (!message) {
         console.error("Message creation returned null");
-        return NextResponse.json({ success: false, error: "Failed to create message" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "Failed to create message" }, { status: 500, headers: corsHeaders });
       }
       
       if (user) {
         message.user = user;
       } else {
         console.error("User info not found");
-        return NextResponse.json({ success: false, error: "User not found" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "User not found" }, { status: 500, headers: corsHeaders });
       }
     } catch (error: any) {
       console.error("Error creating message:", error);
@@ -82,12 +87,12 @@ export async function POST(req: Request) {
         success: false, 
         error: error.message || "Failed to send message",
         details: error.toString()
-      }, { status: 500 });
+      }, { status: 500, headers: corsHeaders });
     }
 
-    return NextResponse.json({ success: true, message });
+    return NextResponse.json({ success: true, message }, { headers: corsHeaders });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500, headers: corsHeaders });
   }
 }

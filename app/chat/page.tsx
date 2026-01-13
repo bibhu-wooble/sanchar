@@ -58,7 +58,11 @@ export default function ChatPage() {
       return;
     }
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
+    // Use environment variable or default to same origin (relative URL)
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
+      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    
+    const socketInstance = io(socketUrl, {
       transports: ['websocket', 'polling'],
     });
     setSocket(socketInstance);

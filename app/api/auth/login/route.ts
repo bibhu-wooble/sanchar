@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { corsHeaders } from "@/lib/cors";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +15,7 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: "Email and password are required" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -19,7 +24,7 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -28,7 +33,7 @@ export async function POST(req: Request) {
     if (!isMatch) {
       return NextResponse.json(
         { success: false, error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -43,12 +48,12 @@ export async function POST(req: Request) {
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" } as SignOptions
     );
 
-    return NextResponse.json({ success: true, token, user });
+    return NextResponse.json({ success: true, token, user }, { headers: corsHeaders });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json(
       { success: false, error: error.message },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

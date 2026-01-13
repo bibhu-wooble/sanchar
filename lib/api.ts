@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// Use relative URLs (same origin) in production, or environment variable if set
+// This ensures API calls work on the same domain (no CORS issues)
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface RegisterData {
   name: string;

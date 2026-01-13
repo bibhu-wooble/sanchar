@@ -1,3 +1,8 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3000"); // replace with your deployed URL
+// Use environment variable or default to same origin (relative URL)
+// In production, this will use the same domain as the app
+const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+
+export const socket = io(socketUrl);

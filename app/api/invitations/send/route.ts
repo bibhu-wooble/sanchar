@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { corsHeaders } from "@/lib/cors";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +13,7 @@ export async function POST(req: Request) {
     const token = req.headers.get("authorization")?.split(" ")[1];
 
     if (!roomId || !email || !token) {
-      return NextResponse.json({ success: false, error: "Missing data" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing data" }, { status: 400, headers: corsHeaders });
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
@@ -16,13 +21,13 @@ export async function POST(req: Request) {
     // Find invitee by email
     const invitee = await (prisma as any).user.findUnique({ where: { email } });
     if (!invitee) {
-      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404, headers: corsHeaders });
     }
 
     // Check if room exists
     const room = await (prisma as any).room.findUnique({ where: { id: roomId } });
     if (!room) {
-      return NextResponse.json({ success: false, error: "Room not found" }, { status: 404 });
+      return NextResponse.json({ success: false, error: "Room not found" }, { status: 404, headers: corsHeaders });
     }
 
     // Check if already a participant
@@ -30,7 +35,7 @@ export async function POST(req: Request) {
       where: { userId_roomId: { userId: invitee.id, roomId } },
     });
     if (existingParticipant) {
-      return NextResponse.json({ success: false, error: "User is already in the room" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "User is already in the room" }, { status: 400, headers: corsHeaders });
     }
 
     // Check if invitation already exists
@@ -38,7 +43,7 @@ export async function POST(req: Request) {
       where: { roomId_inviteeId: { roomId, inviteeId: invitee.id } },
     });
     if (existingInvitation) {
-      return NextResponse.json({ success: false, error: "Invitation already sent" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Invitation already sent" }, { status: 400, headers: corsHeaders });
     }
 
     // Create invitation
@@ -55,9 +60,9 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, invitation });
+    return NextResponse.json({ success: true, invitation }, { headers: corsHeaders });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500, headers: corsHeaders });
   }
 }

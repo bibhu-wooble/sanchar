@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { corsHeaders } from "@/lib/cors";
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(req: Request) {
   try {
@@ -9,7 +14,7 @@ export async function POST(req: Request) {
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, error: "All fields are required" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -18,7 +23,7 @@ export async function POST(req: Request) {
     if (existingUser) {
       return NextResponse.json(
         { success: false, error: "User already exists" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -38,12 +43,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json({ success: true, user }, { headers: corsHeaders });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json(
       { success: false, error: error.message },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
