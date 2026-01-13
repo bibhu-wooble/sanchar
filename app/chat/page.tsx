@@ -59,12 +59,34 @@ export default function ChatPage() {
     }
 
     // Use environment variable or default to same origin (relative URL)
+    // NOTE: Vercel doesn't support WebSockets. Set NEXT_PUBLIC_SOCKET_URL to a separate socket server
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
       (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     
     const socketInstance = io(socketUrl, {
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+      timeout: 20000,
+      autoConnect: true,
     });
+    
+    // Handle connection errors gracefully
+    socketInstance.on('connect_error', (error) => {
+      console.warn('Socket connection failed. Real-time features disabled:', error.message);
+      // App will continue to work, just without real-time updates
+    });
+    
+    socketInstance.on('connect', () => {
+      console.log('Socket connected successfully');
+    });
+    
+    socketInstance.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+    });
+    
     setSocket(socketInstance);
 
     if (user?.id) {
