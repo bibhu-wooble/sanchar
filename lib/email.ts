@@ -20,7 +20,7 @@ const createTransporter = () => {
   const smtpPassword = process.env.SMTP_PASSWORD || 'vbyg qfwb qvmx bvqw';
   const smtpSecure = process.env.SMTP_SECURE === 'true';
 
-  return nodemailer.createTransport({
+  const transportConfig: any = {
     host: smtpHost,
     port: smtpPort,
     secure: smtpSecure, // true for 465, false for other ports
@@ -28,20 +28,42 @@ const createTransporter = () => {
       user: smtpUser,
       pass: smtpPassword,
     },
+  };
+
+  // For Gmail and most SMTP servers, we need TLS
+  if (!smtpSecure && smtpPort === 587) {
+    transportConfig.requireTLS = true;
+    transportConfig.tls = {
+      rejectUnauthorized: false, // Allow self-signed certificates if needed
+    };
+  }
+
+  console.log('SMTP Configuration:', {
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    user: smtpUser,
+    // Don't log password
   });
+
+  return nodemailer.createTransport(transportConfig);
 };
 
 export async function sendVerificationEmail(email: string, name: string, token: string) {
   try {
+    console.log('Attempting to send verification email to:', email);
     const transporter = createTransporter();
 
     // Verify transporter configuration
+    console.log('Verifying SMTP connection...');
     await transporter.verify();
+    console.log('SMTP connection verified successfully');
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
     
     const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+    console.log('Verification URL:', verificationUrl);
 
     const mailOptions = {
       from: `"Sanchar" <${process.env.SMTP_USER || 'bibhu@wooble.org'}>`,
@@ -90,11 +112,22 @@ export async function sendVerificationEmail(email: string, name: string, token: 
       `,
     };
 
+    console.log('Sending email...');
     const info = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent:', info.messageId);
+    console.log('✅ Verification email sent successfully!');
+    console.log('Message ID:', info.messageId);
+    console.log('Response:', info.response);
     return info;
-  } catch (error) {
-    console.error('Failed to send verification email:', error);
+  } catch (error: any) {
+    console.error('❌ Failed to send verification email');
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack,
+    });
     throw error;
   }
 }

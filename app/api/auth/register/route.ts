@@ -74,11 +74,19 @@ export async function POST(req: Request) {
 
     // Send verification email
     try {
+      console.log('Sending verification email to:', email);
       await sendVerificationEmail(email, name, verificationToken);
+      console.log('✅ Verification email sent successfully');
     } catch (emailError: any) {
-      console.error('Failed to send verification email:', emailError);
+      console.error('❌ Failed to send verification email');
+      console.error('Error type:', emailError?.constructor?.name);
+      console.error('Error message:', emailError?.message);
+      console.error('Error code:', emailError?.code);
+      console.error('Full error:', emailError);
+      
       // Don't fail registration if email fails, but log it
       // User can still register and verify later
+      // In production, you might want to queue this for retry
     }
 
     return NextResponse.json(
