@@ -7,20 +7,23 @@ datasource db {
 }
 
 model User {
-  id                  String                @id @default(cuid())
-  name                String
-  email               String                @unique
-  password            String
-  role                String                @default("user")
-  isOnline            Boolean               @default(false)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  messages            Message[]
-  rooms               RoomUser[]
-  sentInvitations     Invitation[]          @relation("SentInvitations")
-  receivedInvitations Invitation[]          @relation("ReceivedInvitations")
-  sentDirectMessages  DirectMessage[]      @relation("SentMessages")
-  receivedDirectMessages DirectMessage[]    @relation("ReceivedMessages")
+  id                      String                @id @default(cuid())
+  name                    String
+  email                   String                @unique
+  password                String
+  role                    String                @default("user")
+  isOnline                Boolean               @default(false)
+  emailVerified           Boolean               @default(false)
+  verificationToken       String?
+  verificationTokenExpiry DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  messages                Message[]
+  rooms                   RoomUser[]
+  sentInvitations         Invitation[]          @relation("SentInvitations")
+  receivedInvitations     Invitation[]          @relation("ReceivedInvitations")
+  sentDirectMessages      DirectMessage[]      @relation("SentMessages")
+  receivedDirectMessages  DirectMessage[]      @relation("ReceivedMessages")
 }
 
 model Room {

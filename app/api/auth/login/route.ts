@@ -37,6 +37,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if email is verified
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Please verify your email before logging in. Check your inbox for the verification link." 
+        },
+        { status: 403, headers: corsHeaders }
+      );
+    }
+
     // JWT Secret
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");

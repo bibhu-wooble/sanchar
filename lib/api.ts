@@ -33,18 +33,52 @@ class ApiClient {
         },
       });
 
-      const data = await response.json().catch(() => ({ error: 'Failed to parse response' }));
-
+      // Check if response is ok before parsing
       if (!response.ok) {
-        const errorMessage = data.error || data.message || `HTTP error! status: ${response.status}`;
-        console.error('API Error:', errorMessage, data);
+        // Try to parse error response as JSON
+        let errorData: any = {};
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            errorData = await response.json();
+          } catch (e) {
+            // If JSON parsing fails, use status text
+            errorData = { error: response.statusText || `HTTP error! status: ${response.status}` };
+          }
+        } else {
+          // If not JSON, try to get text
+          try {
+            const text = await response.text();
+            errorData = { error: text || response.statusText || `HTTP error! status: ${response.status}` };
+          } catch (e) {
+            errorData = { error: response.statusText || `HTTP error! status: ${response.status}` };
+          }
+        }
+        
+        const errorMessage = errorData.error || errorData.message || `HTTP error! status: ${response.status}`;
+        console.error('API Error:', errorMessage, errorData);
         throw new Error(errorMessage);
       }
 
+      // Parse successful response
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('API Error: Expected JSON but got:', contentType, text.substring(0, 100));
+        throw new Error('Invalid response format from server');
+      }
+
+      const data = await response.json();
       return data as T;
     } catch (error: any) {
+      // If it's already an Error with a message, re-throw it
+      if (error instanceof Error && error.message) {
+        console.error('Request failed:', endpoint, error.message);
+        throw error;
+      }
+      // Otherwise, wrap it
       console.error('Request failed:', endpoint, error);
-      throw error;
+      throw new Error(error.message || 'Network error occurred');
     }
   }
 

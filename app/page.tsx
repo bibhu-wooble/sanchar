@@ -4,12 +4,485 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import Link from 'next/link';
+import {
+  Hash,
+  Lock,
+  Users,
+  MessageSquare,
+  Zap,
+  Shield,
+  Smartphone,
+  ArrowRight,
+  Check,
+  Menu,
+  X,
+  ChevronRight,
+  Search,
+  Link2,
+  Headphones,
+} from 'lucide-react';
 
+// Navigation Component
+function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <nav className="sticky top-0 z-50 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] backdrop-blur-lg bg-opacity-80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 bg-[hsl(var(--accent))] rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
+              <span className="text-[hsl(var(--accent-foreground))] font-bold text-sm">S</span>
+            </div>
+            <span className="font-bold text-lg text-[hsl(var(--foreground))]">Sanchar</span>
+          </Link>
+
+          <div className="hidden md:flex gap-8">
+            <Link href="#features" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              Features
+            </Link>
+            <Link href="#testimonials" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              Testimonials
+            </Link>
+            <Link href="#about" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              About
+            </Link>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition px-4 py-2"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-6 py-2 rounded-full font-medium hover:opacity-90 transition"
+            >
+              Get Started
+            </Link>
+          </div>
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 rounded-lg text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden py-4 border-t border-[hsl(var(--border))] animate-slide-down">
+            <div className="flex flex-col gap-3">
+              <Link
+                href="#features"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              >
+                Features
+              </Link>
+              <Link
+                href="#testimonials"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              >
+                Testimonials
+              </Link>
+              <Link
+                href="#about"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              >
+                About
+              </Link>
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg font-semibold text-center"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// Hero Component
+function Hero() {
+  return (
+    <section className="relative px-4 sm:px-6 lg:px-8 py-20 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--accent))]/10 via-transparent to-transparent"></div>
+      <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="inline-block px-4 py-2 bg-[hsl(var(--secondary))] rounded-full mb-6 fade-in-down border border-[hsl(var(--border))]">
+          <span className="text-sm text-[hsl(var(--muted-foreground))]">Welcome to the future of team communication</span>
+        </div>
+
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-balance leading-tight fade-in-up">
+          Better communication,
+          <span className="block text-[hsl(var(--accent))]">zero friction</span>
+        </h1>
+
+        <p className="text-lg sm:text-xl text-[hsl(var(--muted-foreground))] mb-8 text-balance max-w-2xl mx-auto fade-in-up">
+          Sanchar brings teams together with intuitive messaging, powerful integrations, and lightning-fast performance
+          that gets out of your way.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center fade-in-up">
+          <Link
+            href="/register"
+            className="px-8 py-3 bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-full font-semibold hover:opacity-90 transition transform hover:scale-105 hover-glow flex items-center justify-center gap-2 group"
+          >
+            Start Free Trial
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link
+            href="/login"
+            className="px-8 py-3 border border-[hsl(var(--border))] rounded-full font-semibold hover:bg-[hsl(var(--secondary))] transition hover-lift text-[hsl(var(--foreground))]"
+          >
+            View Demo
+          </Link>
+        </div>
+
+        <div className="mt-16 pt-16 border-t border-[hsl(var(--border))] fade-in">
+          <p className="text-[hsl(var(--muted-foreground))] mb-6 text-sm">Trusted by leading teams</p>
+          <div className="flex justify-center items-center gap-8 flex-wrap">
+            {["Acme", "TechFlow", "DataSync", "CloudWorks"].map((name, idx) => (
+              <div
+                key={name}
+                className="text-[hsl(var(--foreground))] font-semibold opacity-40 fade-in-up transition-smooth hover:opacity-60"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                {name}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Features Component
+function Features() {
+  const features = [
+    {
+      title: "Instant Messaging",
+      description: "Real-time messaging with typing indicators, reactions, and file sharing built-in.",
+      icon: MessageSquare,
+    },
+    {
+      title: "Threaded Conversations",
+      description: "Keep discussions organized with threaded replies that stay synchronized.",
+      icon: Hash,
+    },
+    {
+      title: "Powerful Search",
+      description: "Find exactly what you need with advanced search across all conversations.",
+      icon: Search,
+    },
+    {
+      title: "Custom Integrations",
+      description: "Connect your favorite tools and automate workflows seamlessly.",
+      icon: Link2,
+    },
+    {
+      title: "Enterprise Security",
+      description: "End-to-end encryption, SSO, and compliance with industry standards.",
+      icon: Shield,
+    },
+    {
+      title: "24/7 Support",
+      description: "Our dedicated support team is always ready to help your team succeed.",
+      icon: Headphones,
+    },
+  ];
+
+  return (
+    <section id="features" className="px-4 sm:px-6 lg:px-8 py-20 lg:py-32 bg-[hsl(var(--secondary))]">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16 fade-in-down">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-[hsl(var(--foreground))]">
+            Everything you need for <span className="text-[hsl(var(--accent))]">seamless collaboration</span>
+          </h2>
+          <p className="text-lg text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
+            Packed with powerful features designed to make team communication effortless.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-container">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <div
+                key={index}
+                className="bg-[hsl(var(--background))] rounded-xl p-6 hover:border-[hsl(var(--accent))] border border-[hsl(var(--border))] transition fade-in-up hover-glow group"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="w-12 h-12 bg-[hsl(var(--accent))]/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <IconComponent className="w-6 h-6 text-[hsl(var(--accent))]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-[hsl(var(--foreground))]">{feature.title}</h3>
+                <p className="text-[hsl(var(--muted-foreground))]">{feature.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Testimonials Component
+function Testimonials() {
+  const testimonials = [
+    {
+      quote: "Sanchar completely transformed how our team communicates. We're more productive than ever.",
+      author: "Sarah Chen",
+      role: "Product Manager at TechFlow",
+      initials: "SC",
+    },
+    {
+      quote: "The speed and reliability are unmatched. Our team can focus on work, not on tools.",
+      author: "Marcus Rodriguez",
+      role: "CTO at DataSync",
+      initials: "MR",
+    },
+    {
+      quote: "Best communication platform we've tried. The integrations save us hours every week.",
+      author: "Emily Watson",
+      role: "Operations Lead at CloudWorks",
+      initials: "EW",
+    },
+  ];
+
+  return (
+    <section id="testimonials" className="px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16 fade-in-down">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-[hsl(var(--foreground))]">Loved by teams worldwide</h2>
+          <p className="text-lg text-[hsl(var(--muted-foreground))]">See what our users have to say about Sanchar</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 stagger-container">
+          {testimonials.map((testimonial, index) => (
+            <div
+              key={index}
+              className="bg-[hsl(var(--card))] rounded-xl p-8 border border-[hsl(var(--border))] fade-in-up hover-glow transition"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <p className="text-lg mb-6 text-[hsl(var(--foreground))]">"{testimonial.quote}"</p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] flex items-center justify-center font-bold">
+                  {testimonial.initials}
+                </div>
+                <div>
+                  <p className="font-semibold text-[hsl(var(--foreground))]">{testimonial.author}</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">{testimonial.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// CTA Component
+function CTA() {
+  return (
+    <section className="px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-[hsl(var(--accent))] rounded-2xl p-12 text-center fade-in-up">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-[hsl(var(--accent-foreground))]">
+            Ready to transform your team communication?
+          </h2>
+          <p className="text-lg text-[hsl(var(--accent-foreground))]/80 mb-8 max-w-2xl mx-auto">
+            Join thousands of teams using Sanchar to communicate better, collaborate faster, and ship more.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/register"
+              className="px-8 py-3 bg-[hsl(var(--accent-foreground))] text-[hsl(var(--accent))] rounded-full font-semibold hover:opacity-90 transition transform hover:scale-105"
+            >
+              Start Free Trial
+            </Link>
+            <Link
+              href="/login"
+              className="px-8 py-3 border-2 border-[hsl(var(--accent-foreground))] text-[hsl(var(--accent-foreground))] rounded-full font-semibold hover:bg-[hsl(var(--accent-foreground))]/10 transition"
+            >
+              Schedule Demo
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Footer Component
+function Footer() {
+  return (
+    <footer className="bg-[hsl(var(--secondary))] border-t border-[hsl(var(--border))]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 bg-[hsl(var(--accent))] rounded flex items-center justify-center">
+                <span className="text-[hsl(var(--accent-foreground))] font-bold text-sm">S</span>
+              </div>
+              <span className="font-bold text-[hsl(var(--foreground))]">Sanchar</span>
+            </div>
+            <p className="text-[hsl(var(--muted-foreground))] text-sm">Better communication, zero friction.</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4 text-[hsl(var(--foreground))]">Product</h4>
+            <ul className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <Link href="#features" className="hover:text-[hsl(var(--foreground))] transition">
+                  Features
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Security
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4 text-[hsl(var(--foreground))]">Company</h4>
+            <ul className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <Link href="#about" className="hover:text-[hsl(var(--foreground))] transition">
+                  About
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4 text-[hsl(var(--foreground))]">Legal</h4>
+            <ul className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Privacy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Terms
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-[hsl(var(--foreground))] transition">
+                  Cookies
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-[hsl(var(--border))] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-[hsl(var(--muted-foreground))] text-sm">© {new Date().getFullYear()} Sanchar. All rights reserved.</p>
+          <div className="flex gap-4">
+            <a href="#" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              Twitter
+            </a>
+            <a href="#" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              GitHub
+            </a>
+            <a href="#" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition">
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// About Section
+function About() {
+  return (
+    <section id="about" className="px-4 sm:px-6 lg:px-8 py-20 lg:py-32 bg-[hsl(var(--secondary))]">
+      <div className="max-w-3xl mx-auto text-center">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-6 fade-in-down">
+          About Sanchar
+        </h2>
+        <p className="text-lg md:text-xl text-[hsl(var(--muted-foreground))] leading-relaxed mb-8 fade-in-up">
+          Sanchar is a modern, enterprise-ready communication platform designed to replace Slack for your organization. 
+          Built with Next.js, Socket.io, and Prisma, it provides secure, real-time messaging with organized channels, 
+          direct messages, and powerful collaboration features - all without per-user pricing.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 fade-in-up">
+          {[
+            'Real-time messaging',
+            'Public & private channels',
+            'Email verification',
+            'Direct messages',
+            'User presence indicators',
+            'Channel invitations',
+            'Responsive design',
+            'Secure authentication',
+          ].map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-[hsl(var(--foreground))] fade-in-up" style={{ animationDelay: `${index * 50}ms` }}>
+              <Check className="w-5 h-5 text-[hsl(var(--accent))] flex-shrink-0" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap justify-center gap-4 fade-in-up">
+          {['Next.js', 'Socket.io', 'Prisma', 'TypeScript', 'Tailwind CSS'].map((tech, index) => (
+            <span
+              key={tech}
+              className="px-4 py-2 bg-[hsl(var(--background))] rounded-full text-sm font-medium text-[hsl(var(--foreground))] border border-[hsl(var(--border))] fade-in-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Main Landing Page
 export default function LandingPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -21,313 +494,16 @@ export default function LandingPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
-      {/* Header/Navbar */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-        <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg group-hover:scale-110 transition-transform">
-                S
-              </div>
-              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Sanchar
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="#features" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                Features
-              </Link>
-              <Link href="#about" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                About
-              </Link>
-              <Link
-                href="/login"
-                className="px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all"
-              >
-                Get Started
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-200 animate-slide-down">
-              <div className="flex flex-col gap-3">
-                <Link
-                  href="#features"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Features
-                </Link>
-                <Link
-                  href="#about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  About
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold text-center"
-                >
-                  Get Started
-                </Link>
-              </div>
-            </div>
-          )}
-        </nav>
-      </header>
-
-      {/* Hero Section */}
+    <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))] flex flex-col">
+      <Navigation />
       <main className="flex-1">
-        <section className="relative py-12 md:py-20 lg:py-32 overflow-hidden">
-          {/* Animated Background */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-20 left-10 md:left-20 w-64 h-64 md:w-96 md:h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-            <div className="absolute top-40 right-10 md:right-20 w-64 h-64 md:w-96 md:h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }}></div>
-            <div className="absolute bottom-20 left-1/2 w-64 h-64 md:w-96 md:h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '4s' }}></div>
-          </div>
-
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center max-w-4xl mx-auto">
-              {/* Main Heading */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in">
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Connect
-                </span>
-                <span className="text-gray-800">. </span>
-                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-                  Chat
-                </span>
-                <span className="text-gray-800">. </span>
-                <span className="bg-gradient-to-r from-pink-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Communicate
-                </span>
-              </h1>
-
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                Experience real-time messaging with beautiful animations and seamless connectivity. 
-                Join conversations, create rooms, and stay connected with your community.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 md:mb-20 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <Link
-                  href="/register"
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold text-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-300 text-center"
-                >
-                  Get Started Free
-                </Link>
-                <Link
-                  href="/login"
-                  className="w-full sm:w-auto px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-full font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transform transition-all duration-300 text-center"
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-16 md:py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Powerful Features
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Everything you need for seamless communication
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {[
-                {
-                  icon: '💬',
-                  title: 'Real-time Chat',
-                  description: 'Instant messaging with Socket.io integration for lightning-fast communication',
-                },
-                {
-                  icon: '👥',
-                  title: 'Room Management',
-                  description: 'Create public or private rooms, invite members, and organize your conversations',
-                },
-                {
-                  icon: '🔒',
-                  title: 'Secure & Private',
-                  description: 'JWT authentication and encrypted connections for safe communication',
-                },
-                {
-                  icon: '📱',
-                  title: 'Fully Responsive',
-                  description: 'Beautiful experience on desktop, tablet, and mobile devices',
-                },
-                {
-                  icon: '⚡',
-                  title: 'Lightning Fast',
-                  description: 'Optimized performance with real-time updates and smooth animations',
-                },
-                {
-                  icon: '🎨',
-                  title: 'Beautiful UI',
-                  description: 'Modern, intuitive interface with smooth animations and transitions',
-                },
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:shadow-xl hover:scale-105 transform transition-all duration-300 animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* About Section */}
-        <section id="about" className="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-purple-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-                About Sanchar
-              </h2>
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-8">
-                Sanchar is a modern, real-time chat application built with Next.js, Socket.io, and Prisma. 
-                It provides a seamless communication experience with beautiful animations, responsive design, 
-                and powerful features for both individual and group conversations.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                  Next.js
-                </span>
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                  Socket.io
-                </span>
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                  Prisma
-                </span>
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                  TypeScript
-                </span>
-                <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                  Tailwind CSS
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <Hero />
+        <Features />
+        <Testimonials />
+        <About />
+        <CTA />
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-            {/* Brand */}
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">
-                  S
-                </div>
-                <span className="text-xl font-bold text-white">Sanchar</span>
-              </div>
-              <p className="text-gray-400 mb-4 max-w-md">
-                Connect with your community through real-time messaging. Fast, secure, and beautiful.
-              </p>
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <span className="text-lg">📘</span>
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <span className="text-lg">🐦</span>
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <span className="text-lg">📷</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-                </li>
-                <li>
-                  <Link href="#about" className="hover:text-white transition-colors">About</Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-                </li>
-                <li>
-                  <Link href="/register" className="hover:text-white transition-colors">Sign Up</Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Support</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">Documentation</a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">Help Center</a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">Contact Us</a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 md:mt-12 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Sanchar. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

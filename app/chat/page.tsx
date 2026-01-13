@@ -5,6 +5,28 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore, useChatStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import { io, Socket } from 'socket.io-client';
+import {
+  Hash,
+  Lock,
+  Users,
+  Settings,
+  MoreHorizontal,
+  Smile,
+  Paperclip,
+  Send,
+  AtSign,
+  Menu,
+  PanelRightOpen,
+  PanelRight,
+  Plus,
+  Search,
+  Bell,
+  LogOut,
+  User,
+  X,
+  Reply,
+  MoreVertical,
+} from 'lucide-react';
 
 export default function ChatPage() {
   const router = useRouter();
@@ -459,10 +481,10 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <div className="h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center">
+      <div className="h-screen bg-[hsl(var(--background))] flex items-center justify-center">
         <div className="text-center animate-fade-in">
-          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-gray-600 font-medium">Loading Sanchar...</div>
+          <div className="w-16 h-16 border-4 border-[hsl(var(--border))] border-t-[hsl(var(--accent))] rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-[hsl(var(--foreground))] font-medium">Loading Sanchar...</div>
         </div>
       </div>
     );
@@ -482,24 +504,22 @@ export default function ChatPage() {
   });
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-white overflow-hidden">
+    <div className="h-screen flex flex-col md:flex-row bg-[hsl(var(--background))] overflow-hidden">
       {/* Mobile Header */}
-      <div className="md:hidden h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 shadow-sm z-20">
+      <div className="md:hidden h-14 bg-[hsl(var(--card))] border-b border-[hsl(var(--border))] flex items-center justify-between px-4 shadow-sm z-20">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="p-2 rounded-lg text-gray-700 hover:bg-gray-100"
+            className="p-2 rounded-lg text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="w-8 h-8 bg-[hsl(var(--accent))] rounded-lg flex items-center justify-center text-[hsl(var(--accent-foreground))] font-bold shadow-md">
             S
           </div>
-          <span className="font-bold text-gray-800">Sanchar</span>
+          <span className="font-bold text-[hsl(var(--foreground))]">Sanchar</span>
         </div>
-        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-8 h-8 bg-[hsl(var(--accent))] rounded-full flex items-center justify-center text-[hsl(var(--accent-foreground))] font-bold text-sm shadow-md">
           {user?.name?.[0]?.toUpperCase()}
         </div>
       </div>
@@ -507,320 +527,312 @@ export default function ChatPage() {
       {/* Mobile Sidebar Overlay */}
       {mobileSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          className="md:hidden fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
           onClick={() => setMobileSidebarOpen(false)}
         />
       )}
 
       {/* Left Sidebar */}
-      <div className={`fixed md:static inset-y-0 left-0 z-40 md:z-auto flex flex-col transition-all duration-300 bg-white border-r border-gray-200 ${
+      <div className={`fixed md:static inset-y-0 left-0 z-40 md:z-auto flex flex-col transition-all duration-300 bg-[hsl(var(--card))] border-r border-[hsl(var(--border))] ${
         mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       } ${sidebarCollapsed ? 'w-16' : 'w-64'} md:w-64`}>
         {/* Workspace Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 bg-white">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="w-10 h-10 bg-[hsl(var(--accent))] rounded-lg flex items-center justify-center text-[hsl(var(--accent-foreground))] font-bold shadow-lg">
               S
             </div>
-            {!sidebarCollapsed && <span className="font-bold text-gray-800 text-lg">Sanchar</span>}
-          </div>
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
-            </svg>
-          </button>
-        </div>
-
-        {/* User Info */}
-        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                {user?.name?.[0]?.toUpperCase()}
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-            </div>
             {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm text-gray-800 truncate">{user?.name}</div>
-                <div className="text-xs text-gray-500 truncate">Online</div>
+              <div className="flex-1">
+                <span className="font-bold text-[hsl(var(--foreground))] text-lg">Sanchar</span>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Your Workspace</p>
               </div>
             )}
           </div>
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="p-2 rounded-lg text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--secondary))] hover:text-[hsl(var(--foreground))] transition-colors"
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <PanelRightOpen className="w-5 h-5" />
+            ) : (
+              <PanelRight className="w-5 h-5" />
+            )}
+          </button>
         </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Channels Section */}
-          <div className="px-4 py-2">
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Channels</span>
-                <button
-                  onClick={() => setShowCreateChannel(true)}
-                  className="text-gray-500 hover:text-gray-700 text-lg"
-                  title="Create channel"
-                >
-                  +
-                </button>
-              </div>
-            )}
-            
-            {/* Public Channels */}
-            {publicRooms.map((room: any, index: number) => (
+          {/* Create Channel Button */}
+          {!sidebarCollapsed && (
+            <div className="p-4">
               <button
-                key={room.id}
-                onClick={() => {
-                  setCurrentRoom(room.id);
-                  setView('rooms');
-                  setMobileSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all duration-200 hover-lift ${
-                  currentRoom === room.id
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100 hover:shadow-sm'
-                }`}
-                style={{ animationDelay: `${index * 0.05}s` }}
+                onClick={() => setShowCreateChannel(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--secondary))] hover:bg-[hsl(var(--muted))] transition text-sm font-medium text-[hsl(var(--foreground))]"
               >
-                <span className={currentRoom === room.id ? 'text-white' : 'text-gray-500'}>#</span>
-                {!sidebarCollapsed && <span className="truncate">{room.name}</span>}
+                <Plus size={18} />
+                Create Channel
               </button>
-            ))}
+            </div>
+          )}
 
-            {/* Private Channels */}
-            {privateRooms.length > 0 && !sidebarCollapsed && (
-              <>
-                <div className="mt-4 mb-2">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Private</span>
-                </div>
-                {privateRooms.map((room: any, index: number) => (
-                  <button
-                    key={room.id}
-                    onClick={() => {
-                      setCurrentRoom(room.id);
-                      setView('rooms');
-                      setMobileSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-all duration-200 hover-lift ${
-                      currentRoom === room.id
-                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold shadow-md'
-                        : 'text-gray-700 hover:bg-gray-100 hover:shadow-sm'
-                    }`}
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                  >
-                    <span className={currentRoom === room.id ? 'text-white' : 'text-gray-500'}>🔒</span>
-                    {!sidebarCollapsed && <span className="truncate">{room.name}</span>}
-                  </button>
-                ))}
-              </>
+          {/* Channels Section */}
+          <div className="px-4 pb-2">
+            {!sidebarCollapsed && (
+              <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] px-3 mb-2">CHANNELS</p>
             )}
+            <div className="space-y-1">
+              {/* Public Channels */}
+              {publicRooms.map((room: any, index: number) => (
+                <button
+                  key={room.id}
+                  onClick={() => {
+                    setCurrentRoom(room.id);
+                    setView('rooms');
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${
+                    currentRoom === room.id
+                      ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold'
+                      : 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
+                  }`}
+                >
+                  <Hash className="w-4 h-4 flex-shrink-0" />
+                  {!sidebarCollapsed && <span className="truncate">#{room.name}</span>}
+                </button>
+              ))}
+
+              {/* Private Channels */}
+              {privateRooms.length > 0 && !sidebarCollapsed && (
+                <>
+                  <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] px-3 mb-2 mt-4">PRIVATE</p>
+                  {privateRooms.map((room: any, index: number) => (
+                    <button
+                      key={room.id}
+                      onClick={() => {
+                        setCurrentRoom(room.id);
+                        setView('rooms');
+                        setMobileSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${
+                        currentRoom === room.id
+                          ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold'
+                          : 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
+                      }`}
+                    >
+                      <Lock className="w-4 h-4 flex-shrink-0" />
+                      {!sidebarCollapsed && <span className="truncate">{room.name}</span>}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Direct Messages Section */}
-          <div className="px-4 py-2 border-t border-gray-200">
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Direct Messages</span>
+          {!sidebarCollapsed && (
+            <div className="px-4 pb-2 border-t border-[hsl(var(--border))] mt-2">
+              <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] px-3 mb-2 mt-4">DIRECT MESSAGES</p>
+              <div className="space-y-1">
+                {directMessageUsers.map((u: any) => (
+                  <button
+                    key={u.id}
+                    onClick={() => handleStartDirectMessage(u.id)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${
+                      currentDirectMessage === u.id
+                        ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] font-semibold'
+                        : 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
+                    }`}
+                  >
+                    <div className="relative">
+                      <div className={`w-3 h-3 rounded-full ${onlineUsers.has(u.id) ? 'bg-green-500' : 'bg-gray-500'}`} />
+                    </div>
+                    <span className="truncate">{u.name}</span>
+                  </button>
+                ))}
               </div>
-            )}
-            {directMessageUsers.map((u: any) => (
-              <button
-                key={u.id}
-                onClick={() => handleStartDirectMessage(u.id)}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors ${
-                  currentDirectMessage === u.id
-                    ? 'bg-purple-100 text-purple-900 font-semibold'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <div className="relative">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold ${
-                    onlineUsers.has(u.id) ? 'bg-green-500' : 'bg-gray-400'
-                  }`}>
-                    {u.name?.[0]?.toUpperCase()}
-                  </div>
-                  {onlineUsers.has(u.id) && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                  )}
-                </div>
-                {!sidebarCollapsed && <span className="truncate">{u.name}</span>}
-              </button>
-            ))}
-          </div>
+            </div>
+          )}
 
           {/* All Users (for starting new DMs) */}
           {!sidebarCollapsed && (
-            <div className="px-4 py-2 border-t border-gray-200">
-              <div className="mb-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">All Users</span>
-              </div>
-              {users.slice(0, 10).map((u: any) => (
-                <button
-                  key={u.id}
-                  onClick={() => handleStartDirectMessage(u.id)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="relative">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold ${
-                      onlineUsers.has(u.id) ? 'bg-green-500' : 'bg-gray-400'
-                    }`}>
-                      {u.name?.[0]?.toUpperCase()}
+            <div className="px-4 pb-2 border-t border-[hsl(var(--border))] mt-2">
+              <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] px-3 mb-2 mt-4">ALL USERS</p>
+              <div className="space-y-1">
+                {users.slice(0, 10).map((u: any) => (
+                  <button
+                    key={u.id}
+                    onClick={() => handleStartDirectMessage(u.id)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition"
+                  >
+                    <div className="relative">
+                      <div className={`w-3 h-3 rounded-full ${onlineUsers.has(u.id) ? 'bg-green-500' : 'bg-gray-500'}`} />
                     </div>
-                    {onlineUsers.has(u.id) && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                    )}
-                  </div>
-                  <span className="truncate">{u.name}</span>
-                </button>
-              ))}
+                    <span className="truncate">{u.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-300 p-2">
+        <div className="border-t border-[hsl(var(--border))] p-4 space-y-1">
+          <button
+            onClick={() => {/* Settings - to be implemented */}}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[hsl(var(--secondary))] transition text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+          >
+            <Settings size={18} />
+            {!sidebarCollapsed && <span>Settings</span>}
+          </button>
           <button
             onClick={handleLogout}
-            className="w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[hsl(var(--secondary))] transition text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
           >
-            {!sidebarCollapsed ? 'Sign out' : '🚪'}
+            <LogOut size={18} />
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col bg-white md:static">
+      <div className="flex-1 flex flex-col bg-[hsl(var(--background))] md:static">
         {/* Header */}
-        <div className="h-14 md:h-16 border-b border-gray-200 bg-white flex items-center justify-between px-3 md:px-4 shadow-sm z-10">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-gray-500 hidden sm:inline">#</span>
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-semibold text-gray-800 text-sm md:text-base truncate">
-                {currentRoom
-                  ? rooms.find((r: any) => r.id === currentRoom)?.name || 'Channel'
-                  : currentDirectMessage
-                  ? users.find((u: any) => u.id === currentDirectMessage)?.name || 'Direct Message'
-                  : 'Select a channel or DM'}
-              </span>
-              {currentDirectMessage && (
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${onlineUsers.has(currentDirectMessage) ? 'bg-green-500' : 'bg-gray-400'}`} title={onlineUsers.has(currentDirectMessage) ? 'Online' : 'Offline'} />
-              )}
-            </div>
+        <div className="h-16 px-6 border-b border-[hsl(var(--border))] flex items-center justify-between bg-[hsl(var(--card))]">
+          <div>
+            <h2 className="text-lg font-bold text-[hsl(var(--foreground))]">
+              {currentRoom
+                ? `# ${rooms.find((r: any) => r.id === currentRoom)?.name || 'Channel'}`
+                : currentDirectMessage
+                ? users.find((u: any) => u.id === currentDirectMessage)?.name || 'Direct Message'
+                : 'Select a channel or DM'}
+            </h2>
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">
+              {currentRoom
+                ? `${rooms.find((r: any) => r.id === currentRoom)?.participants?.length || 0} members`
+                : currentDirectMessage
+                ? onlineUsers.has(currentDirectMessage) ? 'Online' : 'Offline'
+                : ''}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
             {currentRoom && (
               <button
                 onClick={() => {
                   setSelectedRoomForInvite(currentRoom);
                   setShowInviteModal(true);
                 }}
-                className="ml-2 md:ml-4 text-xs md:text-sm text-gray-500 hover:text-gray-700 hidden sm:block"
+                className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+                title="Invite to channel"
               >
-                Invite
+                <Users className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
               </button>
             )}
-          </div>
-          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            <button
-              onClick={() => setShowJoinModal(true)}
-              className="px-2 md:px-3 py-1 text-xs md:text-sm text-gray-600 hover:bg-gray-100 rounded"
-            >
-              <span className="hidden sm:inline">Join</span>
-              <span className="sm:hidden">+</span>
-            </button>
             {invitations.length > 0 && (
               <button
                 onClick={() => setView('invitations')}
-                className="px-2 md:px-3 py-1 text-xs md:text-sm bg-purple-600 text-white rounded hover:bg-purple-700 relative"
+                className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition relative"
+                title="View invitations"
               >
-                <span className="hidden sm:inline">Invitations</span>
-                <span className="sm:hidden">📬</span>
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] md:text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                   {invitations.length}
                 </span>
               </button>
             )}
+            <button
+              onClick={() => setShowJoinModal(true)}
+              className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              title="Join channel"
+            >
+              <Plus className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+            </button>
+            <button className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition">
+              <MoreVertical size={20} className="text-[hsl(var(--muted-foreground))]" />
+            </button>
           </div>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 via-blue-50/30 to-gray-50 messages-container py-3 md:py-4 px-2 md:px-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 messages-container bg-[hsl(var(--background))]">
           {currentMessages.length === 0 ? (
             <div className="flex items-center justify-center h-full animate-fade-in">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-[hsl(var(--muted-foreground))]">
                 <div className="text-6xl mb-4 animate-bounce-slow">💬</div>
-                <div className="text-xl font-semibold mb-2 text-gray-700">No messages yet</div>
-                <div className="text-gray-500">Start the conversation!</div>
+                <div className="text-xl font-semibold mb-2 text-[hsl(var(--foreground))]">No messages yet</div>
+                <div className="text-[hsl(var(--muted-foreground))]">Start the conversation!</div>
               </div>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {currentMessages
                 .filter((msg: any, idx: number, arr: any[]) => {
-                  // Remove duplicates by checking if this message ID already appeared earlier
                   return arr.findIndex((m: any) => m.id === msg.id) === idx;
                 })
                 .map((message: any, index: number, filteredArray: any[]) => {
                 const isMyMessage = message.userId === user?.id;
                 const prevMessage = index > 0 ? filteredArray[index - 1] : null;
-                const nextMessage = index < filteredArray.length - 1 ? filteredArray[index + 1] : null;
                 const isSameUser = prevMessage && prevMessage.userId === message.userId;
                 const isConsecutive = isSameUser && 
                   new Date(message.createdAt).getTime() - new Date(prevMessage.createdAt).getTime() < 300000;
                 const showAvatar = !isConsecutive && !isMyMessage;
-                const showName = !isConsecutive && !isMyMessage;
-                const showTime = !nextMessage || nextMessage.userId !== message.userId ||
-                  new Date(nextMessage.createdAt).getTime() - new Date(message.createdAt).getTime() > 300000;
                 
                 return (
                   <div
                     key={message.id}
-                    className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} mb-1 group`}
-                    style={{ animationDelay: `${index * 0.02}s` }}
+                    className={`group flex gap-3 ${isMyMessage ? 'flex-row-reverse' : ''} hover:bg-[hsl(var(--secondary))]/30 px-4 py-2 rounded-lg transition message-enter`}
                   >
-                    <div className={`flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* Avatar - only for received messages */}
-                      {showAvatar && (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-lg ring-2 ring-white">
-                          {message.user?.name?.[0]?.toUpperCase() || 'U'}
-                        </div>
-                      )}
-                      {!showAvatar && !isMyMessage && <div className="w-8 flex-shrink-0" />}
-                      
-                      {/* Message Container */}
-                      <div className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} gap-0.5`}>
-                        {/* Sender Name - only for received messages */}
-                        {showName && (
-                          <div className="text-xs text-gray-500 px-2 py-0.5 font-medium">
-                            {message.user?.name || 'Unknown'}
-                          </div>
-                        )}
-                        
-                        {/* Message Bubble */}
-                        <div
-                          className={`relative px-3 py-2 rounded-2xl transition-all duration-200 ${
-                            isMyMessage
-                              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-tr-sm shadow-lg hover:shadow-xl'
-                              : 'bg-white text-gray-800 rounded-tl-sm shadow-md hover:shadow-lg border border-gray-100'
-                          } ${isConsecutive ? (isMyMessage ? 'rounded-tr-md' : 'rounded-tl-md') : ''}`}
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isMyMessage 
+                          ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' 
+                          : 'bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))]'
+                      }`}
+                    >
+                      {showAvatar || isMyMessage ? (message.user?.name?.[0]?.toUpperCase() || 'U') : <div className="w-8" />}
+                    </div>
+
+                    <div className={`flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-1`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-xs font-semibold text-[hsl(var(--foreground))]">
+                          {isMyMessage ? 'You' : (message.user?.name || 'Unknown')}
+                        </p>
+                        <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                          {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+
+                      <div
+                        className={`px-4 py-2 rounded-lg max-w-xs ${
+                          isMyMessage 
+                            ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' 
+                            : 'bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))]'
+                        }`}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                      </div>
+
+                      {/* Message Actions - Show on hover */}
+                      <div className={`hidden group-hover:flex gap-1 mt-1 ${isMyMessage ? 'flex-row-reverse' : ''} fade-in-up`}>
+                        <button
+                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
+                          title="Add reaction"
                         >
-                          <div className={`whitespace-pre-wrap break-words text-sm leading-relaxed ${isMyMessage ? 'text-white' : 'text-gray-800'}`}>
-                            {message.content}
-                          </div>
-                          
-                          {/* Time inside bubble */}
-                          <div className={`flex items-center gap-1 mt-1 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
-                            <span className={`text-[10px] ${isMyMessage ? 'text-blue-100' : 'text-gray-500'}`}>
-                              {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            {isMyMessage && (
-                              <svg className="w-3 h-3 text-blue-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
+                          <Smile size={16} className="text-[hsl(var(--muted-foreground))]" />
+                        </button>
+                        <button
+                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
+                          title="Reply"
+                        >
+                          <Reply size={16} className="text-[hsl(var(--muted-foreground))]" />
+                        </button>
+                        <button
+                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
+                          title="More options"
+                        >
+                          <MoreVertical size={16} className="text-[hsl(var(--muted-foreground))]" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -831,83 +843,100 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Message Input */}
-        <div className="border-t border-gray-200 bg-white shadow-lg">
-          {/* Typing Indicator - Above input box */}
-          {(() => {
-            const targetId = currentRoom || currentDirectMessage;
-            if (!targetId) return null;
-            const typing = typingUsers[targetId];
-            if (!typing || typing.size === 0) return null;
-            
-            const typingUserIds = Array.from(typing);
-            const typingUserNames = typingUserIds
-              .map((id) => {
-                const user = users.find((u: any) => u.id === id);
-                return user?.name || 'Someone';
-              })
-              .filter((name) => name !== user?.name); // Exclude current user
-            
-            if (typingUserNames.length === 0) return null;
-            
-            return (
-              <div className="px-4 py-2 text-sm text-gray-500 italic animate-pulse-slow border-b border-gray-200 bg-gray-50 animate-slide-down">
-                <span className="inline-flex items-center gap-1">
-                  <span className="flex gap-1">
-                    <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
-                    <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                    <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                  </span>
-                  {typingUserNames.length === 1
-                    ? `${typingUserNames[0]} is typing...`
-                    : typingUserNames.length === 2
-                    ? `${typingUserNames[0]} and ${typingUserNames[1]} are typing...`
-                    : `${typingUserNames[0]}, ${typingUserNames[1]} and ${typingUserNames.length - 2} others are typing...`}
-                </span>
-              </div>
-            );
-          })()}
+        {/* Typing Indicator */}
+        {(() => {
+          const targetId = currentRoom || currentDirectMessage;
+          if (!targetId) return null;
+          const typing = typingUsers[targetId];
+          if (!typing || typing.size === 0) return null;
           
-          <div className="p-3 md:p-4">
-            <div className="flex items-center gap-2 bg-gray-100 rounded-2xl px-3 md:px-4 py-2 border border-gray-200 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all duration-200">
-              <input
-                ref={messageInputRef}
-                type="text"
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  if (e.target.value.trim()) {
-                    handleTyping(true);
-                  } else {
-                    handleTyping(false);
-                  }
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    handleTyping(false);
-                    handleSendMessage();
-                  }
-                }}
-                onBlur={() => {
-                  handleTyping(false);
-                }}
-                placeholder={`Type a message...`}
-                className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder-gray-400 text-sm md:text-base py-1"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!newMessage.trim()}
-                className={`p-2 md:p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
-                  newMessage.trim()
-                    ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg hover:scale-110'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
+          const typingUserIds = Array.from(typing);
+          const typingUserNames = typingUserIds
+            .map((id) => {
+              const user = users.find((u: any) => u.id === id);
+              return user?.name || 'Someone';
+            })
+            .filter((name) => name !== user?.name);
+          
+          if (typingUserNames.length === 0) return null;
+          
+          return (
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-[hsl(var(--border))]">
+              <div className="w-8 h-8 rounded-lg bg-[hsl(var(--secondary))] flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-[hsl(var(--muted-foreground))]">...</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 rounded-full bg-[hsl(var(--muted-foreground))] animate-bounce" />
+                <div className="w-2 h-2 rounded-full bg-[hsl(var(--muted-foreground))] animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="w-2 h-2 rounded-full bg-[hsl(var(--muted-foreground))] animate-bounce" style={{ animationDelay: '0.4s' }} />
+              </div>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                {typingUserNames.length === 1
+                  ? `${typingUserNames[0]} is typing...`
+                  : typingUserNames.length === 2
+                  ? `${typingUserNames[0]} and ${typingUserNames[1]} are typing...`
+                  : `${typingUserNames[0]} and ${typingUserNames.length - 1} others are typing...`}
+              </p>
             </div>
+          );
+        })()}
+
+        {/* Message Input */}
+        <div className="h-20 px-6 py-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+          <div className="flex items-end gap-3">
+            <button
+              className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              title="Attach file"
+              onClick={() => {/* File attachment - to be implemented */}}
+            >
+              <Paperclip size={20} className="text-[hsl(var(--muted-foreground))]" />
+            </button>
+
+            <input
+              ref={messageInputRef}
+              type="text"
+              value={newMessage}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                if (e.target.value.trim()) {
+                  handleTyping(true);
+                } else {
+                  handleTyping(false);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  handleTyping(false);
+                  handleSendMessage();
+                }
+              }}
+              onBlur={() => {
+                handleTyping(false);
+              }}
+              placeholder="Type a message..."
+              className="flex-1 px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-sm text-[hsl(var(--foreground))] placeholder-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+            />
+
+            <button
+              className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              title="Add emoji"
+              onClick={() => {/* Emoji picker - to be implemented */}}
+            >
+              <Smile size={20} className="text-[hsl(var(--muted-foreground))]" />
+            </button>
+
+            <button
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim()}
+              className={`p-2 rounded-lg transition ${
+                newMessage.trim()
+                  ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:opacity-90'
+                  : 'bg-[hsl(var(--secondary))] text-[hsl(var(--muted-foreground))] cursor-not-allowed'
+              }`}
+              title="Send message"
+            >
+              <Send size={20} />
+            </button>
           </div>
         </div>
       </div>
@@ -915,17 +944,17 @@ export default function ChatPage() {
       {/* Create Channel Modal */}
       {showCreateChannel && (
         <div className="fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowCreateChannel(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Create a channel</h3>
+          <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift border border-[hsl(var(--border))]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-4">Create a channel</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Channel name</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Channel name</label>
                 <input
                   type="text"
                   value={newChannelName}
                   onChange={(e) => setNewChannelName(e.target.value)}
                   placeholder="e.g. marketing"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
                   onKeyPress={(e) => e.key === 'Enter' && handleCreateChannel()}
                 />
               </div>
@@ -935,9 +964,9 @@ export default function ChatPage() {
                   id="private"
                   checked={isPrivateChannel}
                   onChange={(e) => setIsPrivateChannel(e.target.checked)}
-                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                  className="w-4 h-4 rounded border-[hsl(var(--border))] bg-[hsl(var(--secondary))] text-[hsl(var(--accent))] focus:ring-[hsl(var(--accent))]"
                 />
-                <label htmlFor="private" className="text-sm text-gray-700">
+                <label htmlFor="private" className="text-sm text-[hsl(var(--foreground))]">
                   Make private (only invited members can access)
                 </label>
               </div>
@@ -948,13 +977,13 @@ export default function ChatPage() {
                   setNewChannelName('');
                   setIsPrivateChannel(false);
                 }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200 button-press"
+                className="px-4 py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-xl transition-all duration-200 button-press"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateChannel}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 hover-lift button-press shadow-md"
+                className="px-4 py-2 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] rounded-xl hover:opacity-90 transition-all duration-200 hover-lift button-press shadow-md"
               >
                 Create
               </button>
@@ -967,14 +996,14 @@ export default function ChatPage() {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowInviteModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Invite to channel</h3>
+          <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift border border-[hsl(var(--border))]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-4">Invite to channel</h3>
             <input
               type="email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="Enter email address"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+              className="w-full px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] mb-4"
               onKeyPress={(e) => e.key === 'Enter' && handleSendInvitation()}
             />
             <div className="flex gap-2 justify-end">
@@ -984,13 +1013,13 @@ export default function ChatPage() {
                   setInviteEmail('');
                   setSelectedRoomForInvite(null);
                 }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200 button-press"
+                className="px-4 py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-xl transition-all duration-200 button-press"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSendInvitation}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 hover-lift button-press shadow-md"
+                className="px-4 py-2 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] rounded-xl hover:opacity-90 transition-all duration-200 hover-lift button-press shadow-md"
               >
                 Send Invitation
               </button>
@@ -1002,14 +1031,14 @@ export default function ChatPage() {
       {/* Join Modal */}
       {showJoinModal && (
         <div className="fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowJoinModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Join a channel</h3>
+          <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift border border-[hsl(var(--border))]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-4">Join a channel</h3>
             <input
               type="text"
               value={joinKey}
               onChange={(e) => setJoinKey(e.target.value.toUpperCase())}
               placeholder="Enter channel key"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+              className="w-full px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] mb-4"
               onKeyPress={(e) => e.key === 'Enter' && handleJoinRoomByKey()}
             />
             <div className="flex gap-2 justify-end">
@@ -1018,13 +1047,13 @@ export default function ChatPage() {
                   setShowJoinModal(false);
                   setJoinKey('');
                 }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200 button-press"
+                className="px-4 py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-xl transition-all duration-200 button-press"
               >
                 Cancel
               </button>
               <button
                 onClick={handleJoinRoomByKey}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 hover-lift button-press shadow-md"
+                className="px-4 py-2 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] rounded-xl hover:opacity-90 transition-all duration-200 hover-lift button-press shadow-md"
               >
                 Join
               </button>
@@ -1035,17 +1064,17 @@ export default function ChatPage() {
 
       {/* Invitations View */}
       {view === 'invitations' && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 animate-slide-up max-h-96 overflow-y-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Pending Invitations</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in backdrop-blur-sm">
+          <div className="bg-[hsl(var(--card))] rounded-lg shadow-xl w-full max-w-md p-6 animate-slide-up max-h-96 overflow-y-auto border border-[hsl(var(--border))]">
+            <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-4">Pending Invitations</h3>
             {invitations.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">No pending invitations</div>
+              <div className="text-center text-[hsl(var(--muted-foreground))] py-8">No pending invitations</div>
             ) : (
               <div className="space-y-3">
                 {invitations.map((inv: any) => (
-                  <div key={inv.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="font-semibold text-gray-900 mb-1">{inv.room.name}</div>
-                    <div className="text-sm text-gray-600 mb-3">
+                  <div key={inv.id} className="border border-[hsl(var(--border))] rounded-lg p-4 bg-[hsl(var(--secondary))]">
+                    <div className="font-semibold text-[hsl(var(--foreground))] mb-1">{inv.room.name}</div>
+                    <div className="text-sm text-[hsl(var(--muted-foreground))] mb-3">
                       Invited by {inv.inviter.name}
                     </div>
                     <div className="flex gap-2">
@@ -1068,7 +1097,7 @@ export default function ChatPage() {
             )}
             <button
               onClick={() => setView('rooms')}
-              className="mt-4 w-full py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="mt-4 w-full py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-lg transition-colors"
             >
               Close
             </button>
