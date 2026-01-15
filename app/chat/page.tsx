@@ -1118,17 +1118,17 @@ export default function ChatPage() {
                           </div>
 
                           {/* Reactions */}
-                          {message.reactions && message.reactions.length > 0 && (
+                          {message.reactions && Array.isArray(message.reactions) && message.reactions.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {Object.entries(
-                                message.reactions.reduce((acc: any, reaction: any) => {
+                              {(Object.entries(
+                                (message.reactions as any[]).reduce((acc: any, reaction: any) => {
                                   if (!acc[reaction.emoji]) {
                                     acc[reaction.emoji] = [];
                                   }
                                   acc[reaction.emoji].push(reaction);
                                   return acc;
                                 }, {} as Record<string, any[]>)
-                              ).map(([emoji, reactions]) => (
+                              ) as [string, any[]][]).map(([emoji, reactions]) => (
                                 <button
                                   key={emoji}
                                   onClick={() => handleToggleReaction(message.id, emoji)}
