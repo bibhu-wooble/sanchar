@@ -20,14 +20,6 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    // Check if user was redirected after email verification
-    if (searchParams.get('verified') === 'true') {
-      setSuccess(true);
-      // Clear the success message after 5 seconds
-      setTimeout(() => setSuccess(false), 5000);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +56,6 @@ function LoginForm() {
             <p className="text-[hsl(var(--muted-foreground))]">Sign in to continue to your workspace</p>
           </div>
 
-          {success && (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm fade-in-up flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              <span>Email verified successfully! You can now log in.</span>
-            </div>
-          )}
 
           {error && (
             <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm fade-in-up">

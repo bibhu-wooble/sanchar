@@ -28,6 +28,7 @@ export default function RegisterPage() {
       const response = await api.register(formData);
       if (response.success) {
         setSuccess(true);
+        // Redirect to login after successful registration
         setTimeout(() => {
           router.push('/login');
         }, 2000);
@@ -59,7 +60,7 @@ export default function RegisterPage() {
           {success && (
             <div className="mb-4 p-4 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm fade-in-up flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Registration successful! Please check your email to verify your account.</span>
+              <span>Registration successful! Redirecting to login...</span>
             </div>
           )}
 

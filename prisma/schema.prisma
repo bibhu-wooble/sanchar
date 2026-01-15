@@ -13,9 +13,6 @@ model User {
   password                String
   role                    String                @default("user")
   isOnline                Boolean               @default(false)
-  emailVerified           Boolean               @default(false)
-  verificationToken       String?
-  verificationTokenExpiry DateTime?
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
   messages                Message[]
@@ -24,6 +21,7 @@ model User {
   receivedInvitations     Invitation[]          @relation("ReceivedInvitations")
   sentDirectMessages      DirectMessage[]      @relation("SentMessages")
   receivedDirectMessages  DirectMessage[]      @relation("ReceivedMessages")
+  reactions               Reaction[]
 }
 
 model Room {
@@ -63,6 +61,7 @@ model Message {
   roomId          String?
   directMessage   DirectMessage?  @relation(fields: [directMessageId], references: [id])
   directMessageId String?
+  reactions       Reaction[]
 }
 
 model Invitation {
@@ -91,4 +90,16 @@ model DirectMessage {
   updatedAt DateTime @updatedAt
 
   @@unique([senderId, receiverId])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, emoji])
 }

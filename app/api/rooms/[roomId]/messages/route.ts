@@ -11,7 +11,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ roomId: 
     const { roomId } = await params;
     const messages = await (prisma as any).message.findMany({
       where: { roomId },
-      include: { user: true },
+      include: { 
+        user: true,
+        reactions: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "asc" },
     });
 

@@ -46,6 +46,10 @@ if (!prismaClient.invitation) {
   console.warn("Warning: invitation model not found on Prisma Client");
 }
 
+if (!prismaClient.reaction) {
+  console.warn("Warning: reaction model not found on Prisma Client");
+}
+
 export const prisma =
   globalForPrisma.prisma ?? prismaClient;
 

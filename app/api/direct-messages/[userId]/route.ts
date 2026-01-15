@@ -54,6 +54,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ userId: 
         ORDER BY m."createdAt" ASC
       `;
       
+      // Get reactions for each message
+      const messageIds = messages.map((m: any) => m.id);
+      let reactions: any[] = [];
+      if (messageIds.length > 0) {
+        try {
+          reactions = await prisma.$queryRaw`
+            SELECT r.*, u.id as "user_id", u.name as "user_name"
+            FROM "Reaction" r
+            JOIN "User" u ON r."userId" = u.id
+            WHERE r."messageId" = ANY(${messageIds})
+          `;
+        } catch (error) {
+          console.error("Error fetching reactions:", error);
+        }
+      }
+
       // Transform the raw query results to match expected format
       messages = messages.map((msg: any) => ({
         id: msg.id,
@@ -69,6 +85,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ userId: 
           name: msg.user_name,
           email: msg.user_email,
         },
+        reactions: reactions.filter((r: any) => r.messageId === msg.id).map((r: any) => ({
+          id: r.id,
+          emoji: r.emoji,
+          userId: r.userId,
+          messageId: r.messageId,
+          createdAt: r.createdAt,
+          user: {
+            id: r.user_id,
+            name: r.user_name,
+          },
+        })),
       }));
     } catch (error) {
       console.error("Error fetching messages:", error);

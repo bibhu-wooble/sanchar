@@ -26,11 +26,14 @@ import {
   X,
   Reply,
   MoreVertical,
+  Edit2,
+  Check,
+  X as XIcon,
 } from 'lucide-react';
 
 export default function ChatPage() {
   const router = useRouter();
-  const { user, token, logout, isAuthenticated } = useAuthStore();
+  const { user, token, logout, isAuthenticated, setAuth } = useAuthStore();
   const {
     currentRoom,
     currentDirectMessage,
@@ -73,6 +76,17 @@ export default function ChatPage() {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [newName, setNewName] = useState(user?.name || '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '👏'];
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -103,15 +117,37 @@ export default function ChatPage() {
     
     socketInstance.on('connect', () => {
       console.log('Socket connected successfully');
+      if (user?.id) {
+        socketInstance.emit('join_room', `user_${user.id}`);
+        // Mark current user as online
+        socketInstance.emit('user_online', { userId: user.id });
+        setUserOnline(user.id, true);
+      }
     });
     
     socketInstance.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
+      if (user?.id) {
+        setUserOnline(user.id, false);
+      }
+    });
+
+    // Listen for user online/offline events
+    socketInstance.on('user_online', ({ userId }: { userId: string }) => {
+      if (userId !== user?.id) {
+        setUserOnline(userId, true);
+      }
+    });
+
+    socketInstance.on('user_offline', ({ userId }: { userId: string }) => {
+      if (userId !== user?.id) {
+        setUserOnline(userId, false);
+      }
     });
     
     setSocket(socketInstance);
 
-    if (user?.id) {
+    if (user?.id && socketInstance.connected) {
       socketInstance.emit('join_room', `user_${user.id}`);
       // Mark current user as online
       socketInstance.emit('user_online', { userId: user.id });
@@ -187,11 +223,7 @@ export default function ChatPage() {
       }
     });
 
-    socketInstance.on('connect', () => {
-      if (currentRoom) {
-        socketInstance.emit('join_room', currentRoom);
-      }
-    });
+    // This is handled in the earlier connect handler
 
     return () => {
       socketInstance.disconnect();
@@ -479,6 +511,196 @@ export default function ChatPage() {
     router.push('/');
   };
 
+  const handleUpdateName = async () => {
+    if (!newName.trim() || !token) return;
+    try {
+      const response = await fetch('/api/users/update', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Update local auth store
+        setAuth(data.user, token);
+        setShowSettings(false);
+        alert('Name updated successfully!');
+      } else {
+        alert(data.error || 'Failed to update name');
+      }
+    } catch (error: any) {
+      alert('Failed to update name: ' + error.message);
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/files/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Add file link to message
+        const fileMessage = `📎 [${data.fileName}](${data.fileUrl})`;
+        setNewMessage(fileMessage);
+        messageInputRef.current?.focus();
+      } else {
+        alert(data.error || 'Failed to upload file');
+      }
+    } catch (error: any) {
+      alert('Failed to upload file: ' + error.message);
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Close more menu, emoji picker, and reaction picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setShowMoreMenu(false);
+      }
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+      // Close reaction picker
+      const target = event.target as HTMLElement;
+      if (!target.closest('.reaction-picker-container')) {
+        setShowReactionPicker(null);
+      }
+      // Close message menus
+      const messageMenus = document.querySelectorAll('[id^="message-menu-"]');
+      messageMenus.forEach((menu) => {
+        if (!menu.contains(target)) {
+          (menu as HTMLElement).style.display = 'none';
+        }
+      });
+    };
+    if (showMoreMenu || showEmojiPicker || showReactionPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMoreMenu, showEmojiPicker, showReactionPicker]);
+
+  // Common emojis
+  const commonEmojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+
+  const insertEmoji = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
+    messageInputRef.current?.focus();
+  };
+
+  const handleEditMessage = (message: any) => {
+    setEditingMessageId(message.id);
+    setEditingContent(message.content);
+  };
+
+  const handleSaveEdit = async (messageId: string) => {
+    if (!editingContent.trim() || !token) return;
+    try {
+      const response = await fetch(`/api/messages/${messageId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: editingContent.trim() }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.success) {
+        // Update message in local state
+        if (currentRoom) {
+          setMessages(currentRoom, (messages[currentRoom] || []).map((msg: any) => 
+            msg.id === messageId ? data.message : msg
+          ));
+        } else if (currentDirectMessage) {
+          setDirectMessages(currentDirectMessage, (directMessages[currentDirectMessage] || []).map((msg: any) => 
+            msg.id === messageId ? data.message : msg
+          ));
+        }
+        setEditingMessageId(null);
+        setEditingContent('');
+      } else {
+        throw new Error(data.error || 'Failed to edit message');
+      }
+    } catch (error: any) {
+      console.error('Edit message error:', error);
+      const errorMsg = error.message || 'Failed to edit message. Please try again.';
+      alert(errorMsg);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditingContent('');
+  };
+
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    if (!token) return;
+    try {
+      const response = await fetch(`/api/messages/${messageId}/reactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ emoji }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data.success) {
+        // Update message in local state with reactions
+        if (currentRoom) {
+          setMessages(currentRoom, (messages[currentRoom] || []).map((msg: any) => 
+            msg.id === messageId ? data.message : msg
+          ));
+        } else if (currentDirectMessage) {
+          setDirectMessages(currentDirectMessage, (directMessages[currentDirectMessage] || []).map((msg: any) => 
+            msg.id === messageId ? data.message : msg
+          ));
+        }
+        setShowReactionPicker(null);
+      } else {
+        throw new Error(data.error || 'Failed to add reaction');
+      }
+    } catch (error: any) {
+      console.error('Reaction error:', error);
+      const errorMsg = error.message || 'Failed to add reaction. Please try again.';
+      alert(errorMsg);
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-screen bg-[hsl(var(--background))] flex items-center justify-center">
@@ -680,7 +902,10 @@ export default function ChatPage() {
         {/* Footer */}
         <div className="border-t border-[hsl(var(--border))] p-4 space-y-1">
           <button
-            onClick={() => {/* Settings - to be implemented */}}
+            onClick={() => {
+              setShowSettings(true);
+              setNewName(user?.name || '');
+            }}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[hsl(var(--secondary))] transition text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
           >
             <Settings size={18} />
@@ -748,9 +973,37 @@ export default function ChatPage() {
             >
               <Plus className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
             </button>
-            <button className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition">
-              <MoreVertical size={20} className="text-[hsl(var(--muted-foreground))]" />
-            </button>
+            <div className="relative" ref={moreMenuRef}>
+              <button 
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+              >
+                <MoreVertical size={20} className="text-[hsl(var(--muted-foreground))]" />
+              </button>
+              {showMoreMenu && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg shadow-lg z-50">
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      setShowSettings(true);
+                      setNewName(user?.name || '');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition rounded-t-lg"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[hsl(var(--secondary))] transition rounded-b-lg"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -803,37 +1056,154 @@ export default function ChatPage() {
                         </span>
                       </div>
 
-                      <div
-                        className={`px-4 py-2 rounded-lg max-w-xs ${
-                          isMyMessage 
-                            ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' 
-                            : 'bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))]'
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                      </div>
+                      {editingMessageId === message.id ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingContent}
+                            onChange={(e) => setEditingContent(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleSaveEdit(message.id);
+                              } else if (e.key === 'Escape') {
+                                handleCancelEdit();
+                              }
+                            }}
+                            className="flex-1 px-3 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleSaveEdit(message.id)}
+                            className="p-1 hover:bg-green-500/20 rounded transition text-green-400"
+                            title="Save"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="p-1 hover:bg-red-500/20 rounded transition text-red-400"
+                            title="Cancel"
+                          >
+                            <XIcon size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className={`px-4 py-2 rounded-lg max-w-xs ${
+                              isMyMessage 
+                                ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]' 
+                                : 'bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))]'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap break-words">
+                              {message.content.split(/(\[.*?\]\(.*?\))/g).map((part: string, idx: number) => {
+                                const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+                                if (linkMatch) {
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={linkMatch[2]}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="underline hover:opacity-80"
+                                    >
+                                      {linkMatch[1]}
+                                    </a>
+                                  );
+                                }
+                                return part;
+                              })}
+                            </p>
+                          </div>
 
-                      {/* Message Actions - Show on hover */}
-                      <div className={`hidden group-hover:flex gap-1 mt-1 ${isMyMessage ? 'flex-row-reverse' : ''} fade-in-up`}>
-                        <button
-                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
-                          title="Add reaction"
-                        >
-                          <Smile size={16} className="text-[hsl(var(--muted-foreground))]" />
-                        </button>
-                        <button
-                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
-                          title="Reply"
-                        >
-                          <Reply size={16} className="text-[hsl(var(--muted-foreground))]" />
-                        </button>
-                        <button
-                          className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
-                          title="More options"
-                        >
-                          <MoreVertical size={16} className="text-[hsl(var(--muted-foreground))]" />
-                        </button>
-                      </div>
+                          {/* Reactions */}
+                          {message.reactions && message.reactions.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(
+                                message.reactions.reduce((acc: any, reaction: any) => {
+                                  if (!acc[reaction.emoji]) {
+                                    acc[reaction.emoji] = [];
+                                  }
+                                  acc[reaction.emoji].push(reaction);
+                                  return acc;
+                                }, {} as Record<string, any[]>)
+                              ).map(([emoji, reactions]) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleToggleReaction(message.id, emoji)}
+                                  className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 transition ${
+                                    reactions.some((r: any) => r.userId === user?.id)
+                                      ? 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]'
+                                      : 'bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]'
+                                  }`}
+                                >
+                                  <span>{emoji}</span>
+                                  <span>{reactions.length}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Message Actions - Show on hover */}
+                          <div className={`hidden group-hover:flex gap-1 mt-1 ${isMyMessage ? 'flex-row-reverse' : ''} fade-in-up relative`}>
+                            <div className="relative reaction-picker-container">
+                              <button
+                                onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
+                                className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
+                                title="Add reaction"
+                              >
+                                <Smile size={16} className="text-[hsl(var(--muted-foreground))]" />
+                              </button>
+                              {showReactionPicker === message.id && (
+                                <div className="absolute bottom-full left-0 mb-2 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg shadow-lg p-2 flex gap-1 z-50">
+                                  {reactionEmojis.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleToggleReaction(message.id, emoji)}
+                                      className="p-1 hover:bg-[hsl(var(--secondary))] rounded text-lg transition"
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            {isMyMessage && (
+                              <div className="relative">
+                                <button
+                                  onClick={() => {
+                                    const menu = document.getElementById(`message-menu-${message.id}`);
+                                    if (menu) {
+                                      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                                    }
+                                  }}
+                                  className="p-1 hover:bg-[hsl(var(--secondary))] rounded transition"
+                                  title="More options"
+                                >
+                                  <MoreVertical size={16} className="text-[hsl(var(--muted-foreground))]" />
+                                </button>
+                                <div
+                                  id={`message-menu-${message.id}`}
+                                  className="hidden absolute bottom-full right-0 mb-2 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg shadow-lg z-50 min-w-[120px]"
+                                >
+                                  <button
+                                    onClick={() => {
+                                      handleEditMessage(message);
+                                      const menu = document.getElementById(`message-menu-${message.id}`);
+                                      if (menu) menu.style.display = 'none';
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition rounded-t-lg flex items-center gap-2"
+                                  >
+                                    <Edit2 size={14} />
+                                    Edit
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -883,11 +1253,18 @@ export default function ChatPage() {
 
         {/* Message Input */}
         <div className="h-20 px-6 py-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="*/*"
+          />
           <div className="flex items-end gap-3">
             <button
               className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
               title="Attach file"
-              onClick={() => {/* File attachment - to be implemented */}}
+              onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip size={20} className="text-[hsl(var(--muted-foreground))]" />
             </button>
@@ -917,13 +1294,30 @@ export default function ChatPage() {
               className="flex-1 px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-sm text-[hsl(var(--foreground))] placeholder-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
             />
 
-            <button
-              className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
-              title="Add emoji"
-              onClick={() => {/* Emoji picker - to be implemented */}}
-            >
-              <Smile size={20} className="text-[hsl(var(--muted-foreground))]" />
-            </button>
+            <div className="relative" ref={emojiPickerRef}>
+              <button
+                className="p-2 hover:bg-[hsl(var(--secondary))] rounded-lg transition"
+                title="Add emoji"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <Smile size={20} className="text-[hsl(var(--muted-foreground))]" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-full right-0 mb-2 w-64 h-48 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg shadow-lg p-3 overflow-y-auto z-50">
+                  <div className="grid grid-cols-8 gap-1">
+                    {commonEmojis.map((emoji, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => insertEmoji(emoji)}
+                        className="p-1 hover:bg-[hsl(var(--secondary))] rounded text-lg transition"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleSendMessage}
@@ -1101,6 +1495,45 @@ export default function ChatPage() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowSettings(false)}>
+          <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in hover-lift border border-[hsl(var(--border))]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-4">Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Your Name</label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full px-4 py-2 bg-[hsl(var(--secondary))] border border-[hsl(var(--border))] rounded-lg text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))]"
+                  onKeyPress={(e) => e.key === 'Enter' && handleUpdateName()}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => {
+                    setShowSettings(false);
+                    setNewName(user?.name || '');
+                  }}
+                  className="px-4 py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] rounded-xl transition-all duration-200 button-press"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateName}
+                  className="px-4 py-2 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] rounded-xl hover:opacity-90 transition-all duration-200 hover-lift button-press shadow-md"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
